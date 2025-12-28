@@ -50,6 +50,15 @@ export function createApp(): Application {
     // General rate limiting
     app.use(generalRateLimiter);
 
+    // Root health check
+    app.get('/', (_req, res) => {
+        res.status(200).json({
+            success: true,
+            message: 'SentinelLink Backend is live 🚀',
+            status: 'OK',
+        });
+    });
+
     // Health check endpoint
     app.get('/health', (_req, res) => {
         res.status(200).json({
