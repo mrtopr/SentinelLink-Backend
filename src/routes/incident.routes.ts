@@ -81,6 +81,30 @@ router.patch(
 );
 
 /**
+ * @route   POST /api/incidents/:id/notes
+ * @desc    Add admin note
+ * @access  Private (Admin only)
+ */
+router.post(
+    '/:id/notes',
+    authenticate,
+    isAdmin,
+    incidentController.addNote.bind(incidentController)
+);
+
+/**
+ * @route   PATCH /api/incidents/:id/severity
+ * @desc    Update incident severity
+ * @access  Private (Admin only)
+ */
+router.patch(
+    '/:id/severity',
+    authenticate,
+    isAdmin,
+    incidentController.updateSeverity.bind(incidentController)
+);
+
+/**
  * @route   POST /api/incidents/:id/upvote
  * @desc    Upvote an incident
  * @access  Private (Authenticated users)
@@ -111,6 +135,18 @@ router.post(
     authenticate,
     isAdmin,
     incidentController.broadcast.bind(incidentController)
+);
+
+/**
+ * @route   DELETE /api/incidents/:id
+ * @desc    Delete an incident
+ * @access  Private (Admin only)
+ */
+router.delete(
+    '/:id',
+    authenticate,
+    isAdmin,
+    incidentController.deleteIncident.bind(incidentController)
 );
 
 export default router;

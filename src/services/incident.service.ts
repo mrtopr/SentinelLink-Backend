@@ -1,12 +1,11 @@
-import { PrismaClient, Incident, Severity, IncidentStatus } from '@prisma/client';
+import { Incident, Severity, IncidentStatus } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import { uploadToCloudinary } from '../config/cloudinary';
 import { checkForDuplicate } from '../utils/duplicateDetector';
 import { env } from '../config/env';
 import { CreateIncidentInput, IncidentQueryInput } from '../validations/incident.schema';
 import { getSocketService } from './socket.service';
-
-const prisma = new PrismaClient();
+import prisma from '../prisma';
 
 /**
  * Incident service - handles all incident-related business logic
@@ -195,6 +194,65 @@ export class IncidentService {
         }
 
         return incident;
+    }
+
+    /**
+     * Add admin note to incident
+     */
+    async addAdminNote(
+        incidentId: string,
+        adminId: string,
+        note: string
+    ): Promise<Incident> {
+        await prisma.adminNote.create({
+            data: {
+                incidentId,
+                userId: adminId,
+                note,
+            },
+        });
+
+        // Return the updated incident with notes
+        const incident = await this.getIncidentById(incidentId);
+        if (!incident) {
+            throw new Error('Incident not found after adding note');
+        }
+        return incident;
+    }
+
+    /**
+     * Update incident severity
+     */
+    async updateSeverity(
+        incidentId: string,
+        severity: Severity
+    ): Promise<Incident> {
+        const incident = await prisma.incident.update({
+            where: { id: incidentId },
+            data: {
+                severity,
+                updatedAt: new Date(),
+            },
+        });
+
+        const socketService = getSocketService();
+        if (socketService) {
+            socketService.emitIncidentUpdate(incident);
+        }
+
+        return incident;
+    }
+
+    /**
+     * Delete an incident
+     */
+    async deleteIncident(id: string): Promise<void> {
+        // Check if exists
+        const incident = await prisma.incident.findUnique({ where: { id } });
+        if (!incident) throw new Error('Incident not found');
+
+        // Delete (Cascade handles notes)
+        await prisma.incident.delete({ where: { id } });
     }
 
     /**

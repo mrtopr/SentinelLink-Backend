@@ -1,8 +1,9 @@
+
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken, TokenPayload } from '../utils/jwt';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
+import prisma from '../prisma';
 
 /**
  * Extend Express Request to include user information

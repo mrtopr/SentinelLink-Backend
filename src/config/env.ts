@@ -43,7 +43,7 @@ function validateEnv() {
 
     if (!parsed.success) {
         console.error('❌ Invalid environment variables:');
-        console.error(parsed.error.flatten().fieldErrors);
+        console.error(JSON.stringify(parsed.error.flatten().fieldErrors, null, 2));
         throw new Error('Invalid environment variables');
     }
 

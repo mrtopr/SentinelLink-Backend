@@ -1,10 +1,9 @@
+import 'dotenv/config';
 import { createServer } from 'http';
-import { PrismaClient } from '@prisma/client';
 import { createApp } from './app';
 import { env } from './config/env';
 import { initializeSocketService } from './services/socket.service';
-
-const prisma = new PrismaClient();
+import prisma from './prisma';
 
 /**
  * Main server entry point

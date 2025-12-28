@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { env } from '../config/env';
 import { loginSchema, registerSchema } from '../validations/auth.schema';
 import { generateToken } from '../utils/jwt';
 import { AppError } from '../middleware/error.middleware';
-
-const prisma = new PrismaClient();
+import prisma from '../prisma';
 
 /**
  * Authentication controller

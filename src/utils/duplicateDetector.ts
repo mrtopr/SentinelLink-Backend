@@ -1,8 +1,7 @@
-import { PrismaClient, Incident } from '@prisma/client';
+import { Incident } from '@prisma/client';
 import { isWithinDistance } from './distance';
 import { env } from '../config/env';
-
-const prisma = new PrismaClient();
+import prisma from '../prisma';
 
 /**
  * Result of duplicate detection
