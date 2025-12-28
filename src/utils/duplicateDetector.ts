@@ -1,4 +1,4 @@
-import { Incident } from '@prisma/client';
+import { Incident } from '@prisma/client'; 
 import { isWithinDistance } from './distance';
 import { env } from '../config/env';
 import prisma from '../prisma';

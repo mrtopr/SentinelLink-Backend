@@ -204,6 +204,88 @@ export class AuthController {
             next(error);
         }
     }
+
+    /**
+     * PATCH /api/auth/users/:id/role
+     * Update user role (Admin only)
+     */
+    async updateUserRole(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const { role } = req.body;
+
+            if (!['ADMIN', 'CITIZEN'].includes(role)) {
+                throw new AppError('Invalid role', 400);
+            }
+
+            const user = await prisma.user.update({
+                where: { id },
+                data: { role },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    createdAt: true
+                }
+            });
+
+            res.status(200).json({
+                success: true,
+                data: user,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /api/auth/users
+     * Create a new user (Admin only)
+     */
+    async createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            // Reusing register schema for validation
+            const validatedData = registerSchema.parse(req.body);
+
+            // Check if user already exists
+            const existingUser = await prisma.user.findUnique({
+                where: { email: validatedData.email },
+            });
+
+            if (existingUser) {
+                throw new AppError('User with this email already exists', 409);
+            }
+
+            // Hash password
+            const saltRounds = 12;
+            const passwordHash = await bcrypt.hash(validatedData.password, saltRounds);
+
+            // Create user
+            const user = await prisma.user.create({
+                data: {
+                    name: validatedData.name,
+                    email: validatedData.email,
+                    passwordHash,
+                    role: validatedData.role || 'CITIZEN',
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    createdAt: true,
+                },
+            });
+
+            res.status(201).json({
+                success: true,
+                data: user,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export const authController = new AuthController();

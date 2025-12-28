@@ -12,6 +12,10 @@ export const incidentTypes = [
     'CRIME',
     'INFRASTRUCTURE',
     'ENVIRONMENTAL',
+    'PUBLIC_DISTURBANCE',
+    'POWER_OUTAGE',
+    'NATURAL_DISASTER',
+    'SUSPICIOUS',
     'OTHER',
 ] as const;
 

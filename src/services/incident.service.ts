@@ -263,49 +263,51 @@ export class IncidentService {
         incidentId: string,
         userId: string
     ): Promise<{ incident: Incident; alreadyVoted: boolean }> {
+        let incident: Incident;
+
         // For anonymous votes, skip the Vote record and just increment
         if (userId === 'anonymous') {
-            const incident = await prisma.incident.update({
+            incident = await prisma.incident.update({
                 where: { id: incidentId },
                 data: {
                     upvoteCount: { increment: 1 },
                 },
             });
-            return { incident, alreadyVoted: false };
-        }
-
-        // Check if user already voted
-        const existingVote = await prisma.vote.findUnique({
-            where: {
-                userId_incidentId: {
-                    userId,
-                    incidentId,
+        } else {
+            // Check if user already voted
+            const existingVote = await prisma.vote.findUnique({
+                where: {
+                    userId_incidentId: {
+                        userId,
+                        incidentId,
+                    },
                 },
-            },
-        });
-
-        if (existingVote) {
-            const incident = await prisma.incident.findUnique({
-                where: { id: incidentId },
             });
-            return { incident: incident!, alreadyVoted: true };
-        }
 
-        // Create vote and update count in a transaction
-        const [, incident] = await prisma.$transaction([
-            prisma.vote.create({
-                data: {
-                    userId,
-                    incidentId,
-                },
-            }),
-            prisma.incident.update({
-                where: { id: incidentId },
-                data: {
-                    upvoteCount: { increment: 1 },
-                },
-            }),
-        ]);
+            if (existingVote) {
+                const fetchedIncident = await prisma.incident.findUnique({
+                    where: { id: incidentId },
+                });
+                return { incident: fetchedIncident!, alreadyVoted: true };
+            }
+
+            // Create vote and update count in a transaction
+            const result = await prisma.$transaction([
+                prisma.vote.create({
+                    data: {
+                        userId,
+                        incidentId,
+                    },
+                }),
+                prisma.incident.update({
+                    where: { id: incidentId },
+                    data: {
+                        upvoteCount: { increment: 1 },
+                    },
+                }),
+            ]);
+            incident = result[1];
+        }
 
         // Check verification threshold
         if (

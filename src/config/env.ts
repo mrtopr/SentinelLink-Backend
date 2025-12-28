@@ -29,7 +29,7 @@ const envSchema = z.object({
     RATE_LIMIT_MAX_REQUESTS: z.string().default('10').transform(Number),
 
     // Incident Configuration
-    VERIFICATION_THRESHOLD: z.string().default('5').transform(Number),
+    VERIFICATION_THRESHOLD: z.string().default('3').transform(Number),
     DUPLICATE_DISTANCE_METERS: z.string().default('200').transform(Number),
     DUPLICATE_TIME_MINUTES: z.string().default('10').transform(Number),
 });

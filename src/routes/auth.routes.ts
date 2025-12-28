@@ -51,6 +51,18 @@ router.get(
 );
 
 /**
+ * @route   POST /api/auth/users
+ * @desc    Create a new user
+ * @access  Private (Admin only)
+ */
+router.post(
+    '/users',
+    authenticate,
+    isAdmin,
+    authController.createUser.bind(authController)
+);
+
+/**
  * @route   DELETE /api/auth/users/:id
  * @desc    Delete a user
  * @access  Private (Admin only)
@@ -60,6 +72,18 @@ router.delete(
     authenticate,
     isAdmin,
     authController.deleteUser.bind(authController)
+);
+
+/**
+ * @route   PATCH /api/auth/users/:id/role
+ * @desc    Update user role
+ * @access  Private (Admin only)
+ */
+router.patch(
+    '/users/:id/role',
+    authenticate,
+    isAdmin,
+    authController.updateUserRole.bind(authController)
 );
 
 export default router;
