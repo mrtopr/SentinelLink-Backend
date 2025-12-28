@@ -77,6 +77,18 @@ class SocketService {
     }
 
     /**
+     * Emit emergency broadcast to all clients
+     */
+    emitBroadcast(message: string): void {
+        this.io.emit('emergency:broadcast', {
+            type: 'emergency:broadcast',
+            message,
+            timestamp: new Date().toISOString(),
+        });
+        console.log(`[Socket.IO] Emitted emergency:broadcast: ${message}`);
+    }
+
+    /**
      * Emit incident update event to all connected clients
      */
     emitIncidentUpdate(incident: Incident): void {

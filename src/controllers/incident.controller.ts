@@ -1,4 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import { prisma } from '../lib/prisma';
+import { env } from '../config/env';
+import { getSocketService } from '../services/socket.service';
 import { IncidentStatus } from '@prisma/client';
 import { incidentService } from '../services/incident.service';
 import {
@@ -312,6 +315,12 @@ export class IncidentController {
         try {
             const { message } = req.body;
             console.log(`[BROADCAST] ${message}`);
+
+            const socketService = getSocketService();
+            if (socketService) {
+                socketService.emitBroadcast(message);
+            }
+
             res.status(200).json({
                 success: true,
                 message: 'Broadcast initiated successfully',
