@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  CITIZEN
+  ADMIN
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum IncidentStatus {
+  REPORTED
+  VERIFIED
+  IN_PROGRESS
+  RESOLVED
+  FLAGGED
+}
+
+// Models
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(CITIZEN)
+  createdAt    DateTime @default(now())
+
+  votes      Vote[]
+  adminNotes AdminNote[]
+
+  @@index([email])
+}
+
+model Incident {
+  id           String         @id @default(uuid())
+  incidentType String
+  description  String
+  latitude     Float
+  longitude    Float
+  severity     Severity       @default(MEDIUM)
+  status       IncidentStatus @default(REPORTED)
+  mediaUrl     String?
+  upvoteCount  Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  votes      Vote[]
+  adminNotes AdminNote[]
+
+  @@index([createdAt])
+  @@index([incidentType])
+  @@index([latitude, longitude])
+  @@index([status])
+}
+
+model Vote {
+  id         String   @id @default(uuid())
+  userId     String
+  incidentId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, incidentId])
+  @@index([incidentId])
+}
+
+model AdminNote {
+  id         String   @id @default(uuid())
+  incidentId String
+  userId     String
+  note       String
+  createdAt  DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([incidentId])
+}
